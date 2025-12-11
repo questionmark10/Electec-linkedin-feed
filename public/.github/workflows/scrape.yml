@@ -1,0 +1,35 @@
+name: Scrape LinkedIn
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"   # Kör var 20:e minut
+  workflow_dispatch:        # Gör att du kan trigga manuellt
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run scraper
+        run: npm run scrape
+
+      - name: Commit updated HTML
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "actions@github.com"
+          git add public/index.html
+          git commit -m "Update scraped LinkedIn feed" || echo "No changes"
+          git push
