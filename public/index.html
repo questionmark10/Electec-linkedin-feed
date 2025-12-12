@@ -1,12 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
 <head>
-    <meta charset="utf-8">
-    <title>LinkedIn Feed</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electec – LinkedIn Nyheter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #feed {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        .post {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
-    <h1>LinkedIn feed laddas...</h1>
-    <p>Cloudflare Worker kommer senare lägga in riktig data.</p>
+    <h1>Electec – LinkedIn Nyheter</h1>
+
+    <div id="feed">Laddar nyheter...</div>
+
+    <script>
+        async function loadFeed() {
+            const feedEl = document.getElementById("feed");
+            feedEl.innerHTML = "Hämtar data...";
+
+            try {
+                const response = await fetch("YOUR_WORKER_URL_HERE");
+                if (!response.ok) throw new Error("Kunde inte hämta nyheter");
+
+                const items = await response.json();
+
+                if (!Array.isArray(items) || items.length === 0) {
+                    feedEl.innerHTML = "<p>Inga LinkedIn-nyheter hittades.</p>";
+                    return;
+                }
+
+                feedEl.innerHTML = "";
+
+                items.forEach(post => {
+                    const p = document.createElement("div");
+                    p.className = "post";
+
+                    p.innerHTML = `
+                        <div class="date">${post.date}</div>
+                        <div>${post.text}</div>
+                        <p><a href="${post.url}" target="_blank">Visa på LinkedIn</a></p>
+                    `;
+
+                    feedEl.appendChild(p);
+                });
+
+            } catch (err) {
+                feedEl.innerHTML = "<p>Kunde inte ladda flödet.</p>";
+                console.error(err);
+            }
+        }
+
+        loadFeed();
+    </script>
 </body>
 </html>
-
